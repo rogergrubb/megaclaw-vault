@@ -1,69 +1,12 @@
-# MegaClaw Vault â€” Auto-Installer
-# Run on any Windows OpenClaw machine:
-# irm https://raw.githubusercontent.com/rogergrubb/megaclaw-vault/main/install.ps1 | iex
-
-$WORKSPACE = "$env:USERPROFILE\.openclaw\workspace"
-$VAULT_DIR = "$WORKSPACE\megaclaw-vault"
-
-Write-Host "Installing MegaClaw Vault client..." -ForegroundColor Cyan
-
-# Create folder
+$VAULT_DIR = "$env:USERPROFILE\.openclaw\workspace\megaclaw-vault"
 New-Item -ItemType Directory -Force -Path $VAULT_DIR | Out-Null
-
-# Write the client file
-$client = @'
-const MEGACLAW_API = "https://script.google.com/macros/s/AKfycbyPY1h46Sak0WMcXb2bOTBbQQNriaa-7vEG-DCGSWNt0AnXIpb08H-k46nzDzy645jlSA/exec";
-const MEGACLAW_KEY = "59e5af8fbb2b87e2f9fca16492fabd36e4da90e1ed0dfcca";
-
-// Projects: BrainCandy | MegaClaw | PaperVault | SellFastNow | MultiPowerAI | BookFactory | Brainforge | MapAndMingle
-
-function _url(params) {
-  return MEGACLAW_API + "?key=" + MEGACLAW_KEY + (params ? "&" + params : "");
-}
-async function readMemory(project, key) {
-  const r = await fetch(_url("project=" + encodeURIComponent(project) + "&q=" + encodeURIComponent(key)));
-  return r.json();
-}
-async function writeMemory(project, key, content, tags = []) {
-  const r = await fetch(_url("project=" + encodeURIComponent(project)), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ project, key, content, tags })
-  });
-  return r.json();
-}
-async function searchMemories(project, query) {
-  const r = await fetch(_url("project=" + encodeURIComponent(project) + "&q=" + encodeURIComponent(query)));
-  return r.json();
-}
-async function updateMemory(id, project, content, tags) {
-  const r = await fetch(_url("id=" + encodeURIComponent(id) + "&project=" + encodeURIComponent(project)), {
-    method: "PUT", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ project, content, tags })
-  });
-  return r.json();
-}
-module.exports = { readMemory, writeMemory, searchMemories, updateMemory };
-'@
-
-$client | Out-File -FilePath "$VAULT_DIR\megaclaw-client.js" -Encoding utf8 -Force
-
-# Quick connectivity test
-Write-Host "Testing live connection..." -ForegroundColor Yellow
+$b64 = "Y29uc3QgTUVHQUNMQVdfQVBJID0gImh0dHBzOi8vc2NyaXB0Lmdvb2dsZS5jb20vbWFjcm9zL3MvQUtmeWNieVBZMWg0NlNhazBXTWNYYjJiT1RCYlFRTnJpYWEtN3ZFRy1EQ0dTV050MEFuWElwYjA4SC1rNDZuekR6eTY0NWpsU0EvZXhlYyI7CmNvbnN0IE1FR0FDTEFXX0tFWSA9ICI1OWU1YWY4ZmJiMmI4N2UyZjlmY2ExNjQ5MmZhYmQzNmU0ZGE5MGUxZWQwZGZjY2EiOwpmdW5jdGlvbiBfdXJsKHBhcmFtcyl7cmV0dXJuIE1FR0FDTEFXX0FQSSsiP2tleT0iK01FR0FDTEFXX0tFWSsocGFyYW1zPyImIitwYXJhbXM6IiIpO30KYXN5bmMgZnVuY3Rpb24gcmVhZE1lbW9yeShwcm9qZWN0LGtleSl7Y29uc3Qgcj1hd2FpdCBmZXRjaChfdXJsKCJwcm9qZWN0PSIrZW5jb2RlVVJJQ29tcG9uZW50KHByb2plY3QpKyImcT0iK2VuY29kZVVSSUNvbXBvbmVudChrZXkpKSk7cmV0dXJuIHIuanNvbigpO30KYXN5bmMgZnVuY3Rpb24gd3JpdGVNZW1vcnkocHJvamVjdCxrZXksY29udGVudCx0YWdzPVtdKXtjb25zdCByPWF3YWl0IGZldGNoKF91cmwoInByb2plY3Q9IitlbmNvZGVVUklDb21wb25lbnQocHJvamVjdCkpLHttZXRob2Q6IlBPU1QiLGhlYWRlcnM6eyJDb250ZW50LVR5cGUiOiJhcHBsaWNhdGlvbi9qc29uIn0sYm9keTpKU09OLnN0cmluZ2lmeSh7cHJvamVjdCxrZXksY29udGVudCx0YWdzfSl9KTtyZXR1cm4gci5qc29uKCk7fQphc3luYyBmdW5jdGlvbiBzZWFyY2hNZW1vcmllcyhwcm9qZWN0LHF1ZXJ5KXtjb25zdCByPWF3YWl0IGZldGNoKF91cmwoInByb2plY3Q9IitlbmNvZGVVUklDb21wb25lbnQocHJvamVjdCkrIiZxPSIrZW5jb2RlVVJJQ29tcG9uZW50KHF1ZXJ5KSkpO3JldHVybiByLmpzb24oKTt9CmFzeW5jIGZ1bmN0aW9uIHVwZGF0ZU1lbW9yeShpZCxwcm9qZWN0LGNvbnRlbnQsdGFncyl7Y29uc3Qgcj1hd2FpdCBmZXRjaChfdXJsKCJpZD0iK2VuY29kZVVSSUNvbXBvbmVudChpZCkrIiZwcm9qZWN0PSIrZW5jb2RlVVJJQ29tcG9uZW50KHByb2plY3QpKSx7bWV0aG9kOiJQVVQiLGhlYWRlcnM6eyJDb250ZW50LVR5cGUiOiJhcHBsaWNhdGlvbi9qc29uIn0sYm9keTpKU09OLnN0cmluZ2lmeSh7cHJvamVjdCxjb250ZW50LHRhZ3N9KX0pO3JldHVybiByLmpzb24oKTt9Cm1vZHVsZS5leHBvcnRzPXtyZWFkTWVtb3J5LHdyaXRlTWVtb3J5LHNlYXJjaE1lbW9yaWVzLHVwZGF0ZU1lbW9yeX07"
+[System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($b64)) | Out-File -FilePath "$VAULT_DIR\megaclaw-client.js" -Encoding utf8 -Force
 $API = "https://script.google.com/macros/s/AKfycbyPY1h46Sak0WMcXb2bOTBbQQNriaa-7vEG-DCGSWNt0AnXIpb08H-k46nzDzy645jlSA/exec"
 $KEY = "59e5af8fbb2b87e2f9fca16492fabd36e4da90e1ed0dfcca"
-
 try {
-  $result = Invoke-RestMethod -Uri "$API`?key=$KEY&project=MegaClaw&q=install-test" -Method GET -MaximumRedirection 10
-  if ($result.success -eq $true) {
-    Write-Host "SUCCESS â€” MegaClaw Vault connected." -ForegroundColor Green
-  } else {
-    Write-Host "WARNING: $($result | ConvertTo-Json -Compress)" -ForegroundColor Yellow
-  }
-} catch {
-  Write-Host "ERROR: $_" -ForegroundColor Red
-}
-
-Write-Host ""
-Write-Host "Client installed at: $VAULT_DIR\megaclaw-client.js" -ForegroundColor Cyan
-Write-Host "Done." -ForegroundColor Green
+    $r = Invoke-RestMethod -Uri "$API`?key=$KEY&project=MegaClaw&q=install-test" -Method GET -MaximumRedirection 10
+    if ($r.success -eq $true) { Write-Host "SUCCESS - MegaClaw Vault connected." -ForegroundColor Green }
+    else { Write-Host "WARNING: $($r | ConvertTo-Json -Compress)" -ForegroundColor Yellow }
+} catch { Write-Host "ERROR: $_" -ForegroundColor Red }
+Write-Host "Installed: $VAULT_DIR\megaclaw-client.js" -ForegroundColor Cyan
